@@ -1,75 +1,95 @@
+#import the libary
 import pygame
 import math
 import random
+
+#initialization init -> pygame
 pygame.init()
 
-#screen, width, height
+#size of frame ((width, height), option)
 screen = pygame.display.set_mode((800,600), pygame.RESIZABLE)
 
-#caption
+#title
 pygame.display.set_caption("Đồ án Python")
 
-#icon
-icon = pygame.image.load("icon_screen.png")
+#icon for title 
+icon = pygame.image.load("icon_screen.jpg")
 pygame.display.set_icon(icon)
 
 #background
 background = pygame.image.load("icon_screen.jpg")
+
+#editing background -> get width & height at screen size
 resized_background = pygame.transform.scale(background, (800, 600))
 
-#number in square
-font = pygame.font.Font(None, 36)
-
-#candy
+#variable
 cols, rows = 5, 8
 square_size = 50
 spacing = 10
 
-#drag
 dragging = None
 
-#default
+#current location
 original_pos = None
 
-#offset
+#current cursor position
 offset_x, offset_y = 0,0
 
+#list
 squares = []
 image_list = []
 
-#image file
+#path
 image_file =["img1.jpg","img2.jpg", "img3.jpg", "img4.jpg"]
+
+#input image
 for img_f in image_file:
     img = pygame.image.load(img_f)
     img = pygame.transform.scale(img, (square_size, square_size))
     image_list.append(img)
-#
+
+#edit frames and obj as they change width & height
 def update_grid_position(width, height):
+    
+    #create new list
     squares.clear()
+    
+    #variable -> center screen
     grid_width = cols * square_size + (cols - 1) * spacing
     grid_height = rows * square_size + (rows - 1) * spacing
     start_x = (width - grid_width) //2
     start_y = (height - grid_height) //2
+    
+    #content initialization
     for row in range(rows):
         for col in range(cols):
             x = start_x + col * (square_size + spacing)
             y = start_y + row * (square_size + spacing)
+            
+            #component of squares (obj list)
             squares.append({"rect": pygame.Rect(x,y, square_size, square_size),
                             "pos": (col, row),
                             "image": random.choice(image_list)
                             })
 
+#original frame
 update_grid_position(800,600)
 
-#changed square
+#function changed location
 def find_nearest_square(target):
+    
+    #variable
     nearest_square = None
     min_distance = square_size *2
     
     for square in squares:
+        
+        #current location
         if square == target:
             continue
         
+        #else: calculate distance between 2 obj (center obj1 -> center obj2) -> Euclid
+        #distance = sqrt((x2 - x1** 2 + (y2 - y1)**2)
         dist = math.dist(target["rect"].center, square["rect"].center)
         if dist < min_distance:
             min_distance = dist
@@ -77,49 +97,74 @@ def find_nearest_square(target):
     
     return nearest_square
 
-#run code
+#start the program
 running = True
 while running:
+    
+    #draw background at (0,0)
     screen.blit(resized_background,(0,0))
     
+    #get event from user
     for event in pygame.event.get():
+        
+        #click on x
         if event.type == pygame.QUIT:
             running = False
         
+        #stretch frame
         if event.type == pygame.VIDEORESIZE:
+            
+            #get new width & height
             width, height = event.w, event.h
+            
+            #create new frame size
             screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
             resized_background = pygame.transform.scale(background, (width, height))
             update_grid_position(width, height)
         
+        #when user click
         if event.type == pygame.MOUSEBUTTONDOWN:
             mx, my = event.pos
             for square in squares:
                 if square["rect"].collidepoint(mx,my):
+                    
+                    #get current location, square
                     dragging = square
                     original_pos = square["rect"].topleft
                     offset_x = mx - square["rect"].x
                     offset_y = my - square["rect"].y
                     break
         
+        #user move mouse
         if event.type == pygame.MOUSEMOTION and dragging:
             mx, my = event.pos
             dragging["rect"].x = mx - offset_x
             dragging["rect"].y = my - offset_y
         
+        #user release the mouse button
         if event.type == pygame.MOUSEBUTTONUP and dragging:
+            
+            #call function
             nearest_square = find_nearest_square(dragging)
+            
             if nearest_square:
-                print(f"Swapping {dragging['pos']} with {nearest_square['pos']}")
+                
+                #nearest != None -> swap info dragging and nearest_square
+                #this line for debugging if drag and drop event fails
+                #print(f"Swapping {dragging['pos']} with {nearest_square['pos']}")
+                #rect
                 dragging["rect"].topleft, nearest_square["rect"].topleft = nearest_square["rect"].topleft, original_pos
+                #pos
                 dragging["pos"], nearest_square["pos"] = nearest_square["pos"], dragging["pos"]
-                #dragging["image"], nearest_square["image"] = nearest_square["image"], dragging["image"]
             else:
-                print("chua swap")
+                #line 153
+                #print("no change")
+                #back original position
                 dragging["rect"].topleft = original_pos
 
             dragging = None
     
+    #create content
     for square in squares:
         pygame.draw.rect(screen, (255,255,255), square["rect"])
         screen.blit(square["image"], square["rect"].topleft)
