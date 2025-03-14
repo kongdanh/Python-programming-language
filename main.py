@@ -27,6 +27,9 @@ cols, rows = 5, 8
 square_size = 50
 spacing = 10
 
+moving_square = []
+speed = 0.004
+
 dragging = None
 
 #current location
@@ -76,26 +79,45 @@ def update_grid_position(width, height):
 update_grid_position(800,600)
 
 #function changed location
-def find_nearest_square(target):
+def find_nearest_square(target, start_pos, end_pos):
     
-    #variable
-    nearest_square = None
-    min_distance = square_size *2
+    direction = pygame.Vector2(end_pos) - pygame.Vector2(start_pos)
+    
+    if (abs(direction.x) > abs(direction.y)):
+        if (direction.x) > 0:
+            move_direction = (1,0)
+        else:
+            move_direction = (-1,0)
+    else:
+        if direction.y > 0:
+            move_direction = (0,1)
+        else:
+            move_direction = (0,-1)
     
     for square in squares:
-        
-        #current location
         if square == target:
             continue
-        
-        #else: calculate distance between 2 obj (center obj1 -> center obj2) -> Euclid
-        #distance = sqrt((x2 - x1** 2 + (y2 - y1)**2)
-        dist = math.dist(target["rect"].center, square["rect"].center)
-        if dist < min_distance:
-            min_distance = dist
-            nearest_square = square
+        if (square["pos"][0] - target["pos"][0], square["pos"][1] - target["pos"][1]) == move_direction:
+            return square
+    return None
+    # #variable
+    # nearest_square = None
+    # min_distance = square_size *2
     
-    return nearest_square
+    # for square in squares:
+        
+    #     #current location
+    #     if square == target:
+    #         continue
+        
+    #     #else: calculate distance between 2 obj (center obj1 -> center obj2) -> Euclid
+    #     #distance = sqrt((x2 - x1** 2 + (y2 - y1)**2)
+    #     dist = math.dist(target["rect"].center, square["rect"].center)
+    #     if dist < min_distance:
+    #         min_distance = dist
+    #         nearest_square = square
+    
+    # return nearest_square
 
 #start the program
 running = True
@@ -145,15 +167,27 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and dragging:
             
             #call function
-            nearest_square = find_nearest_square(dragging)
+            nearest_square = find_nearest_square(dragging,original_pos, dragging["rect"].topleft)
             
             if nearest_square:
+                
+                moving_square.append({
+                    "square": dragging,
+                    "start_pos": pygame.Vector2(dragging["rect"].topleft),
+                    "end_pos": pygame.Vector2(nearest_square["rect"].topleft)
+                })
+                
+                moving_square.append({
+                    "square": nearest_square,
+                    "start_pos": pygame.Vector2(nearest_square["rect"].topleft),
+                    "end_pos": pygame.Vector2(dragging["rect"].topleft)
+                })
                 
                 #nearest != None -> swap info dragging and nearest_square
                 #this line for debugging if drag and drop event fails
                 #print(f"Swapping {dragging['pos']} with {nearest_square['pos']}")
                 #rect
-                dragging["rect"].topleft, nearest_square["rect"].topleft = nearest_square["rect"].topleft, original_pos
+                #dragging["rect"].topleft, nearest_square["rect"].topleft = nearest_square["rect"].topleft, original_pos
                 #pos
                 dragging["pos"], nearest_square["pos"] = nearest_square["pos"], dragging["pos"]
             else:
@@ -163,6 +197,21 @@ while running:
                 dragging["rect"].topleft = original_pos
 
             dragging = None
+    
+    #
+    for move in moving_square[:]:
+        square = move["square"]
+        start = move["start_pos"]
+        end = move["end_pos"]
+        
+        new_pos = start.lerp(end,speed)
+        square["rect"].topleft = (round(new_pos.x), round(new_pos.y))
+        
+        if new_pos.distance_to(end) < 1:
+            square["rect"].topleft = end
+            moving_square.remove(move)
+        else:
+            move["start_pos"] = new_pos
     
     #create content
     for square in squares:
