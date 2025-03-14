@@ -138,8 +138,8 @@ while running:
         #user move mouse
         if event.type == pygame.MOUSEMOTION and dragging:
             mx, my = event.pos
-            dragging["rect"].x = mx - offset_x
-            dragging["rect"].y = my - offset_y
+            # dragging["rect"].x = mx - offset_x
+            # dragging["rect"].y = my - offset_y
         
         #user release the mouse button
         if event.type == pygame.MOUSEBUTTONUP and dragging:
