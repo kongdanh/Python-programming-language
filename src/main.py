@@ -7,28 +7,28 @@ import random
 pygame.init()
 
 #size of frame ((width, height), option)
-screen = pygame.display.set_mode((800,600), pygame.RESIZABLE)
+screen = pygame.display.set_mode((500,600), pygame.RESIZABLE)
 
 #title
 pygame.display.set_caption("Đồ án Python")
 
 #icon for title 
-icon = pygame.image.load("icon_screen.jpg")
+icon = pygame.image.load("C:/Users/danhc/Documents/K2N2/PYTHON/DO_AN/assets/icon_screen.jpg")
 pygame.display.set_icon(icon)
 
 #background
-background = pygame.image.load("icon_screen.jpg")
+background = pygame.image.load("C:/Users/danhc/Documents/K2N2/PYTHON/DO_AN/assets/icon_screen.jpg")
 
 #editing background -> get width & height at screen size
-resized_background = pygame.transform.scale(background, (800, 600))
+resized_background = pygame.transform.scale(background, (500, 600))
 
 #variable
 cols, rows = 5, 8
-square_size = 50
-spacing = 10
+square_size = 30
+spacing = 5
 
 moving_square = []
-speed = 0.004
+speed = 0.01
 
 dragging = None
 
@@ -43,7 +43,10 @@ squares = []
 image_list = []
 
 #path
-image_file =["img1.jpg","img2.jpg", "img3.jpg", "img4.jpg"]
+image_file =["C:/Users/danhc/Documents/K2N2/PYTHON/DO_AN/assets/img1.jpg",
+             "C:/Users/danhc/Documents/K2N2/PYTHON/DO_AN/assets/img2.jpg",
+             "C:/Users/danhc/Documents/K2N2/PYTHON/DO_AN/assets/img3.jpg",
+             "C:/Users/danhc/Documents/K2N2/PYTHON/DO_AN/assets/img4.jpg"]
 
 #input image
 for img_f in image_file:
@@ -76,7 +79,7 @@ def update_grid_position(width, height):
                             })
 
 #original frame
-update_grid_position(800,600)
+update_grid_position(500,600)
 
 #function changed location
 def find_nearest_square(target, start_pos, end_pos):
@@ -118,6 +121,12 @@ def find_nearest_square(target, start_pos, end_pos):
     #         nearest_square = square
     
     # return nearest_square
+
+def get_square_clicked(target):
+    clicked_square = []
+    
+    
+    return 
 
 #start the program
 running = True
@@ -168,6 +177,7 @@ while running:
             
             #call function
             nearest_square = find_nearest_square(dragging,original_pos, dragging["rect"].topleft)
+            square_choice = get_square_clicked(target)
             
             if nearest_square:
                 
@@ -218,6 +228,8 @@ while running:
         pygame.draw.rect(screen, (255,255,255), square["rect"])
         screen.blit(square["image"], square["rect"].topleft)
     
+    # oval = pygame.draw.rect(screen, (255, 255, 255), (400, 300), 100)
+    # screen.blit(oval,(300,200))
     pygame.display.update()
     
 pygame.quit()

@@ -1,0 +1,20 @@
+/game_project
+│── /assets         # Chứa tài nguyên (hình ảnh, âm thanh, font chữ, ...)
+│   │── /images     # Chứa hình ảnh, sprites
+│   │── /sounds     # Chứa file âm thanh (nhạc nền, hiệu ứng)
+│   │── /fonts      # Chứa font chữ
+│
+│── /src            # Chứa code nguồn chính của game
+│   │── /scenes     # Chứa code của từng màn chơi hoặc menu
+│   │── /entities   # Chứa định nghĩa các đối tượng (nhân vật, vật phẩm, ...)
+│   │── /utils      # Chứa các hàm tiện ích (tải hình, xử lý va chạm, ...)
+│   │── main.py     # File chạy game chính
+│
+│── /config         # Chứa file cấu hình game
+│   │── settings.py # Các thông số game (màn hình, FPS, ...)
+│
+│── /docs           # Tài liệu hướng dẫn, ghi chú
+│
+│── requirements.txt # Danh sách thư viện cần cài đặt (nếu dùng Python)
+│── README.md        # Hướng dẫn chạy game
+│── .gitignore       # Loại trừ file không cần theo dõi trong Git
