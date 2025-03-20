@@ -9,6 +9,13 @@ offset_x, offset_y = 0, 0
 moving_square = []
 speed = 0.01
 
+def draw_ui():
+    rect_x, rect_y = 100,530
+    rect_width, rect_height = 300,50
+    border_color = (255,255,255)
+    
+    pygame.draw.rect(screen, border_color, (rect_x, rect_y, rect_width, rect_height), 2)
+
 while running:
     screen.blit(resized_background, (0, 0))
     
@@ -60,6 +67,8 @@ while running:
     for square in squares:
         pygame.draw.rect(screen, (255, 255, 255), square["rect"])
         screen.blit(square["image"], square["rect"].topleft)
+    
+    draw_ui()
     
     pygame.display.update()
 pygame.quit()
