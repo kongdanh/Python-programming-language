@@ -106,6 +106,26 @@ while running:
 
     draw_ui()  # Vẽ khung UI
     square_manager.draw_selected_squares()  # Vẽ danh sách ô đã chọn
+    
+    # Khi hoàn thành màn chơi -> không còn square trên sàn
+    if not squares:
+        
+        # Tạo mờ màn hình chính
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0,0,0, 180))
+        screen.blit(overlay, (0,0))
+        
+        # Tạo box chứa thông tin hoàn thành màn đè lên screen
+        box_rect = pygame.Rect(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 3, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3)
+        pygame.draw.rect(screen, (255,255,255), box_rect, border_radius=10)
+        pygame.draw.rect(screen, (0,0,0), box_rect, 3, border_radius=10)
+        
+        # Thông tin màn hoàn thành -> text, animation,...
+        font = pygame.font.Font(None, 36)
+        text = font.render("Level complete!", True, (0,0,0))
+        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
+        
+    pygame.display.flip()
     pygame.display.update()
 
 pygame.quit()
