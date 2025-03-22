@@ -26,15 +26,44 @@ def on_square_click(square):
     if square not in selected_squares:
         if len(selected_squares) < max_selected:
             selected_squares.append(square)
+            matched_square()
+
             update_selected_position()
-
-# Cập nhật vị trí các square trong khung chọn
+            
+# Hàm cập nhật vị trí các square trong khung chọn
 def update_selected_position():
-    start_x, start_y, spacing = 115, 540, 40  # Điều chỉnh vị trí và khoảng cách
+    start_x, start_y, spacing = 115, 540, 40  # Vị trí bắt đầu và khoảng cách giữa các ô
 
+    # Cập nhật vị trí mới cho các squares còn lại
     for i, square in enumerate(selected_squares):
         square["rect"].x = start_x + i * spacing
         square["rect"].y = start_y
+        screen.blit(square["image"], square["rect"].topleft)  # Vẽ hình ảnh vào vị trí mới
+
+    pygame.display.update()  # Cập nhật màn hình
+
+
+# Hàm kiểm tra và xóa các squares nếu có 3 hình ảnh giống nhau
+def matched_square():
+    global selected_squares
+
+    img_count = {}
+
+    # Đếm số lần xuất hiện của từng loại ảnh
+    for square in selected_squares:
+        img = square["image"]
+        img_count[img] = img_count.get(img, 0) + 1
+
+    # Lọc ra danh sách ảnh có ít nhất 3 ô vuông giống nhau
+    matched_images = {img for img, count in img_count.items() if count == 3}
+
+    if matched_images:
+        # Xóa tất cả các square có image thuộc matched_images
+        selected_squares = [square for square in selected_squares if square["image"] not in matched_images]
+
+        # Cập nhật lại vị trí các squares còn lại
+        update_selected_position()
+
 
 while running:
     screen.blit(resized_background, (0, 0))
@@ -71,14 +100,16 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and dragging:
             if not mouse_moved:  # Nếu không kéo, thêm vào khung chọn
                 on_square_click(dragging)
+                matched_square()
 
     # Vẽ squares
     for square in squares:
         pygame.draw.rect(screen, (255, 255, 255), square["rect"])
         screen.blit(square["image"], square["rect"].topleft)
 
+    # Vẽ khung
     draw_ui()
-
+    
     pygame.display.update()
 
 pygame.quit()
