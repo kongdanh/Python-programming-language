@@ -1,5 +1,5 @@
 import pygame
-from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT
+from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page
 from player import squares, update_grid_position
 
 # Khởi tạo Pygame
@@ -66,6 +66,7 @@ running = True
 dragging = None
 offset_x, offset_y = 0, 0
 mouse_moved = False  
+game_state = "play"
 
 while running:
     screen.blit(resized_background, (0, 0))
@@ -73,7 +74,17 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+        
+        # gọi trang chủ nếu nhấn vào box -> thay đổi giá trị game_state
+        if game_state == "play":
+            if event .type == pygame.MOUSEBUTTONDOWN:
+                if not squares:
+                    if box_rect.collidepoint(event.pos):
+                        game_state = "home"
+        elif game_state == "home":
+            home_page()
+            game_state = "play"
+         
         if event.type == pygame.VIDEORESIZE:
             width, height = event.w, event.h
             screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
@@ -124,7 +135,7 @@ while running:
         font = pygame.font.Font(None, 36)
         text = font.render("Level complete!", True, (0,0,0))
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
-        
+                    
     pygame.display.flip()
     pygame.display.update()
 

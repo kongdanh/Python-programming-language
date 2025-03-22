@@ -20,7 +20,7 @@ background = pygame.image.load(os.path.join(base_dir, "..", "assets", "icon_scre
 resized_background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Thiết lập lưới
-cols, rows = 5, 8
+cols, rows = 2, 3
 square_size = 30
 spacing = 5
 
@@ -31,3 +31,20 @@ for img_f in image_file:
     img = pygame.image.load(img_f)
     img = pygame.transform.scale(img, (square_size, square_size))
     image_list.append(img)
+    
+def home_page():
+    while True:
+        screen.fill((255, 255, 255))  # Đặt nền trắng cho trang chủ
+
+        font = pygame.font.Font(None, 36)
+        text = font.render("Tiledom", True, (0, 0, 0))
+        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            #     return  # Quay lại game khi nhấn chuột
