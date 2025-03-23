@@ -1,7 +1,7 @@
 import pygame
 from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page
 from player import squares, update_grid_position
-
+from config.config import game_state
 # Khởi tạo Pygame
 pygame.init()
 
@@ -66,7 +66,7 @@ running = True
 dragging = None
 offset_x, offset_y = 0, 0
 mouse_moved = False  
-game_state = "play"
+game_state = "home"
 
 while running:
     screen.blit(resized_background, (0, 0))
