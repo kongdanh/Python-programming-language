@@ -18,17 +18,3 @@ def update_grid_position(width, height):
             squares.append({"rect": pygame.Rect(x, y, square_size, square_size),
                             "pos": (col, row),
                             "image": random.choice(image_list)})
-
-update_grid_position(500, 600)
-
-def find_nearest_square(target, start_pos, end_pos):
-    direction = pygame.Vector2(end_pos) - pygame.Vector2(start_pos)
-    move_direction = (1, 0) if abs(direction.x) > abs(direction.y) else (0, 1)
-    move_direction = (-move_direction[0], -move_direction[1]) if direction.x < 0 or direction.y < 0 else move_direction
-    
-    for square in squares:
-        if square == target:
-            continue
-        if (square["pos"][0] - target["pos"][0], square["pos"][1] - target["pos"][1]) == move_direction:
-            return square
-    return None

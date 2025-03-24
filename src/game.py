@@ -1,7 +1,7 @@
 import pygame
-from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page
+import random
+from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page, game_state
 from player import squares, update_grid_position
-from config.config import game_state
 # Khởi tạo Pygame
 pygame.init()
 
@@ -59,6 +59,12 @@ def draw_ui():
     # Vẽ khung chứa các square đã chọn
     pygame.draw.rect(screen, (255, 255, 255), (105, 530, 290, 50), 2)
 
+# Tạo mới game
+def reset_game():
+    global squares
+    square_manager.selected_squares.clear()
+    update_grid_position(500,600)
+
 # Khởi tạo quản lý ô vuông
 square_manager = SquareManager()
 
@@ -82,6 +88,7 @@ while running:
                     if box_rect.collidepoint(event.pos):
                         game_state = "home"
         elif game_state == "home":
+            reset_game()
             home_page()
             game_state = "play"
          

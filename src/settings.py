@@ -1,7 +1,6 @@
 import pygame
 import os
 import random
-from config.config import game_state
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -21,6 +20,9 @@ GRAY = (200,200,200)
 # Chữ
 font = pygame.font.Font(None, 36)
 
+# Trạng thái
+game_state = "home"
+
 # Định nghĩa các nút
 button_start = pygame.Rect(SCREEN_WIDTH // 2 - 100 , 250, 200, 50)
 button_setting = pygame.Rect(SCREEN_WIDTH // 2 - 100, 320, 200, 50)
@@ -34,7 +36,7 @@ def draw_button(button, text):
     screen.blit(text_surface, text_rect)
 
 # Đường dẫn cố định
-base_dir = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 # Icon và hình nền
 icon = pygame.image.load(os.path.join(base_dir, "..", "assets", "icon_screen.jpg"))
