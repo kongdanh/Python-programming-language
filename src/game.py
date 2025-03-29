@@ -1,6 +1,6 @@
 import pygame
 import random
-from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page, game_state
+from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page, game_state,reset_game
 from player import squares, update_grid_position
 # Khởi tạo Pygame
 pygame.init()
@@ -58,12 +58,6 @@ class SquareManager:
 def draw_ui():
     # Vẽ khung chứa các square đã chọn
     pygame.draw.rect(screen, (255, 255, 255), (105, 530, 290, 50), 2)
-
-# Tạo mới game
-def reset_game():
-    global squares
-    square_manager.selected_squares.clear()
-    update_grid_position(500,600)
 
 # Khởi tạo quản lý ô vuông
 square_manager = SquareManager()

@@ -18,3 +18,4 @@ def update_grid_position(width, height):
             squares.append({"rect": pygame.Rect(x, y, square_size, square_size),
                             "pos": (col, row),
                             "image": random.choice(image_list)})
+            

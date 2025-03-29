@@ -56,7 +56,14 @@ for img_f in image_file:
     img = pygame.image.load(img_f)
     img = pygame.transform.scale(img, (square_size, square_size))
     image_list.append(img)
-    
+
+def reset_game():
+    from player import update_grid_position
+    global rows, cols
+    rows, cols = 5, 6  # Reset số hàng, cột
+    update_grid_position(SCREEN_WIDTH, SCREEN_HEIGHT)  # Cập nhật lại vị trí grid
+
+
 def home_page():
     while True:
         screen.fill(WHITE)  # Đặt nền trắng cho trang chủ
@@ -77,6 +84,7 @@ def home_page():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_start.collidepoint(event.pos):
                     print("Đã nhấn vào bắt đầu")
+                    reset_game()  # Reset màn chơi trước khi bắt đầu
                     game_state = "play"
                     return
                 if button_setting.collidepoint(event.pos):
