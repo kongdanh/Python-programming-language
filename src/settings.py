@@ -36,12 +36,13 @@ def draw_button(button, text):
     screen.blit(text_surface, text_rect)
 
 # Đường dẫn cố định
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+current_dir = os.path.dirname(__file__)
+base_dir = os.path.abspath(os.path.join(current_dir, '..', 'assets'))
 
 # Icon và hình nền
-icon = pygame.image.load(os.path.join(base_dir, "..", "assets", "icon_screen.jpg"))
+icon = pygame.image.load(os.path.join(base_dir, "images", "icon_screen.jpg"))
 pygame.display.set_icon(icon)
-background = pygame.image.load(os.path.join(base_dir, "..", "assets", "icon_screen.jpg"))
+background = pygame.image.load(os.path.join(base_dir, "images", "icon_screen.jpg"))
 resized_background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Thiết lập lưới
@@ -51,7 +52,7 @@ spacing = 5
 
 # Hình ảnh cho khối
 image_list = []
-image_file = [os.path.join(base_dir, "..", "assets", f"img{i}.jpg") for i in range(1, 5)]
+image_file = [os.path.join(base_dir, "images", f"img{i}.jpg") for i in range(1, 5)]
 for img_f in image_file:
     img = pygame.image.load(img_f)
     img = pygame.transform.scale(img, (square_size, square_size))

@@ -62,82 +62,84 @@ def draw_ui():
 # Khởi tạo quản lý ô vuông
 square_manager = SquareManager()
 
-running = True
-dragging = None
-offset_x, offset_y = 0, 0
-mouse_moved = False  
-game_state = "home"
+def run_game():
+    running = True
+    dragging = None
+    offset_x, offset_y = 0, 0
+    mouse_moved = False  
+    game_state = "home"
 
-while running:
-    screen.blit(resized_background, (0, 0))
+    while running:
+        screen.blit(resized_background, (0, 0))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            
+            # gọi trang chủ nếu nhấn vào box -> thay đổi giá trị game_state
+            if game_state == "play":
+                if event .type == pygame.MOUSEBUTTONDOWN:
+                    if not squares:
+                        if box_rect.collidepoint(event.pos):
+                            game_state = "home"
+            elif game_state == "home":
+                reset_game()
+                home_page()
+                game_state = "play"
+            
+            # if event.type == pygame.VIDEORESIZE:
+            #     global screen, resized_background
+            #     width, height = event.w, event.h
+            #     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+            #     resized_background = pygame.transform.scale(resized_background, (width, height))  
+            #     update_grid_position(width, height)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = event.pos
+                mouse_moved = False
+                for square in squares:
+                    if square["rect"].collidepoint(mx, my):
+                        dragging = Square(square["image"], square["rect"])  # Chuyển đổi thành đối tượng Square
+                        offset_x = mx - square["rect"].x
+                        offset_y = my - square["rect"].y
+                        break
+
+            if event.type == pygame.MOUSEMOTION and dragging:
+                mouse_moved = True
+
+            if event.type == pygame.MOUSEBUTTONUP and dragging:
+                if not mouse_moved:  
+                    square_manager.remove_square_after_onclick(dragging)
+                    square_manager.add_square(dragging)
+
+
+        # Vẽ các square có trên màn hình
+        for square in squares:
+            pygame.draw.rect(screen, (255, 255, 255), square["rect"])
+            screen.blit(square["image"], square["rect"].topleft)
+
+        draw_ui()  # Vẽ khung UI
+        square_manager.draw_selected_squares()  # Vẽ danh sách ô đã chọn
         
-        # gọi trang chủ nếu nhấn vào box -> thay đổi giá trị game_state
-        if game_state == "play":
-            if event .type == pygame.MOUSEBUTTONDOWN:
-                if not squares:
-                    if box_rect.collidepoint(event.pos):
-                        game_state = "home"
-        elif game_state == "home":
-            reset_game()
-            home_page()
-            game_state = "play"
-         
-        if event.type == pygame.VIDEORESIZE:
-            width, height = event.w, event.h
-            screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-            resized_background = pygame.transform.scale(resized_background, (width, height))  
-            update_grid_position(width, height)
+        # Khi hoàn thành màn chơi -> không còn square trên sàn
+        if not squares:
+            
+            # Tạo mờ màn hình chính
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0,0,0, 180))
+            screen.blit(overlay, (0,0))
+            
+            # Tạo box chứa thông tin hoàn thành màn đè lên screen
+            box_rect = pygame.Rect(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 3, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3)
+            pygame.draw.rect(screen, (255,255,255), box_rect, border_radius=10)
+            pygame.draw.rect(screen, (0,0,0), box_rect, 3, border_radius=10)
+            
+            # Thông tin màn hoàn thành -> text, animation,...
+            font = pygame.font.Font(None, 36)
+            text = font.render("Level complete!", True, (0,0,0))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
+                        
+        pygame.display.flip()
+        pygame.display.update()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mx, my = event.pos
-            mouse_moved = False
-            for square in squares:
-                if square["rect"].collidepoint(mx, my):
-                    dragging = Square(square["image"], square["rect"])  # Chuyển đổi thành đối tượng Square
-                    offset_x = mx - square["rect"].x
-                    offset_y = my - square["rect"].y
-                    break
-
-        if event.type == pygame.MOUSEMOTION and dragging:
-            mouse_moved = True
-
-        if event.type == pygame.MOUSEBUTTONUP and dragging:
-            if not mouse_moved:  
-                square_manager.remove_square_after_onclick(dragging)
-                square_manager.add_square(dragging)
-
-
-    # Vẽ các square có trên màn hình
-    for square in squares:
-        pygame.draw.rect(screen, (255, 255, 255), square["rect"])
-        screen.blit(square["image"], square["rect"].topleft)
-
-    draw_ui()  # Vẽ khung UI
-    square_manager.draw_selected_squares()  # Vẽ danh sách ô đã chọn
-    
-    # Khi hoàn thành màn chơi -> không còn square trên sàn
-    if not squares:
-        
-        # Tạo mờ màn hình chính
-        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0,0,0, 180))
-        screen.blit(overlay, (0,0))
-        
-        # Tạo box chứa thông tin hoàn thành màn đè lên screen
-        box_rect = pygame.Rect(SCREEN_WIDTH // 4, SCREEN_HEIGHT // 3, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3)
-        pygame.draw.rect(screen, (255,255,255), box_rect, border_radius=10)
-        pygame.draw.rect(screen, (0,0,0), box_rect, 3, border_radius=10)
-        
-        # Thông tin màn hoàn thành -> text, animation,...
-        font = pygame.font.Font(None, 36)
-        text = font.render("Level complete!", True, (0,0,0))
-        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
-                    
-    pygame.display.flip()
-    pygame.display.update()
-
-pygame.quit()
+    pygame.quit()
