@@ -96,6 +96,42 @@ def generate_random_squares(num_squares):
         if layer == 0:
             available_positions.discard((col, row, 1))
 
+def move_square(selected_square, target_square, animation_duration=2000):
+ 
+    start_rect = selected_square["rect"].copy()
+    end_rect = target_square["rect"].copy()
+    start_time = pygame.time.get_ticks()
+
+    running = True
+    while running:
+        current_time = pygame.time.get_ticks()
+        time_elapsed = current_time - start_time
+
+        if time_elapsed >= animation_duration:
+            selected_square["rect"] = end_rect
+            running = False
+        else:
+            progress = time_elapsed / animation_duration  # Giá trị từ 0 đến 1
+
+            # Tính toán vị trí x, y mới dựa trên tiến độ
+            new_x = start_rect.x + (end_rect.x - start_rect.x) * progress
+            new_y = start_rect.y + (end_rect.y - start_rect.y) * progress
+
+            selected_square["rect"].x = int(new_x)
+            selected_square["rect"].y = int(new_y)
+
+            # Cập nhật màn hình (bạn cần tích hợp hàm này vào vòng lặp chính của trò chơi)
+            screen.blit(resized_background, (0, 0))  # Vẽ lại background
+            for square in squares:
+                pygame.draw.rect(screen, (255, 255, 255), square["rect"])
+                screen.blit(square["image"], square["rect"].topleft)
+            draw_ui()
+            square_manager.draw_selected_squares()
+            pygame.display.flip()
+
+            # Điều chỉnh tốc độ khung hình nếu cần
+            pygame.time.Clock().tick(100)
+
 def run_game():
     running = True
     dragging = None
@@ -143,7 +179,48 @@ def run_game():
                     square_manager.remove_square_after_onclick(dragging)
                     square_manager.add_square(dragging)
                 dragging = None # Reset dragging sau khi thả chuột
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = event.pos
+                mouse_moved = False
+            for square in squares:
+                if square["rect"].collidepoint(mx, my):
+                    dragging = Square(square["image"], square["rect"].copy()) # Tạo bản sao để di chuyển
+                    dragging_original_data = square.copy() # Lưu trữ dữ liệu gốc để xóa sau
+                    offset_x = mx - square["rect"].x
+                    offset_y = my - square["rect"].y
+                    break
 
+        if event.type == pygame.MOUSEMOTION and dragging:
+            mouse_moved = True
+            dragging.rect.x = event.pos[0] - offset_x
+            dragging.rect.y = event.pos[1] - offset_y
+
+        if event.type == pygame.MOUSEBUTTONUP and dragging:
+            # Xác định ô mục tiêu (nơi chuột được thả)
+            target_square = None
+            for square in squares:
+                if square["rect"].collidepoint(event.pos) and square != dragging_original_data:
+                    target_square = square
+                    break
+
+            if not mouse_moved:
+                square_manager.remove_square_after_onclick(dragging)
+                square_manager.add_square(dragging)
+                dragging = None
+                dragging_original_data = None
+            elif target_square:
+                move_square(dragging_original_data, target_square) # Gọi hàm di chuyển
+                # Cập nhật lại danh sách squares sau khi di chuyển
+                if dragging_original_data in squares:
+                    squares.remove(dragging_original_data)
+                target_square["image"] = dragging.image # Cập nhật hình ảnh ô đích
+                dragging = None
+                dragging_original_data = None
+
+            else:
+                # Nếu không thả vào ô hợp lệ, trả ô về vị trí cũ (tùy logic)
+                dragging = None
+                dragging_original_data = None
 
         # Vẽ các square có trên màn hình
         for square in squares:
