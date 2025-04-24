@@ -46,7 +46,7 @@ background = pygame.image.load(os.path.join(base_dir, "images", "icon_screen.jpg
 resized_background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Thiết lập lưới
-cols, rows = 1,1
+cols, rows = 6,5
 square_size = 30
 spacing = 5
 
