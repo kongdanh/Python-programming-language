@@ -50,6 +50,42 @@ cols, rows = 6,5
 square_size = 30
 spacing = 5
 
+# Âm thanh
+background_music = pygame.mixer.Sound(os.path.join(base_dir, "sounds", "startms.mp3"))
+click_sound = pygame.mixer.Sound(os.path.join(base_dir, "sounds", "click.mp3"))
+match_sound = pygame.mixer.Sound(os.path.join(base_dir, "sounds", "match.mp3"))
+complete_sound = pygame.mixer.Sound(os.path.join(base_dir, "sounds", "complete.wav"))
+game_over_sound = pygame.mixer.Sound(os.path.join(base_dir, "sounds", "gameover.wav")) 
+
+# Chạy âm thanh
+def play_background_music():
+    pygame.mixer.Sound.play(background_music, loops=-1)  # loops=-1 để lặp vô hạn
+    pygame.mixer.Sound.set_volume(background_music, 0.5)
+
+# Phát âm thanh khi nhấn nút
+def play_click_sound():
+    pygame.mixer.Sound.play(click_sound)
+    pygame.mixer.Sound.set_volume(click_sound, 0.7)  # Âm lượng 70%
+
+# Phát âm thanh khi match
+def play_match_sound():
+    pygame.mixer.Sound.play(match_sound)
+    pygame.mixer.Sound.set_volume(match_sound, 0.7)  # Âm lượng 70%
+
+# Phát âm thanh khi thắng
+def play_complete_sound():
+    pygame.mixer.Sound.play(complete_sound)
+    pygame.mixer.Sound.set_volume(complete_sound, 0.7)  # Âm lượng 70%
+
+# Phát âm thanh khi thua
+def play_gameover_sound():
+    pygame.mixer.Sound.play(game_over_sound)
+    pygame.mixer.Sound.set_volume(game_over_sound, 0.7)  # Âm lượng 70%
+    
+# Dừng nhạc nền
+def stop_background_music():
+    pygame.mixer.Sound.stop(background_music)
+
 # Hình ảnh cho khối
 image_list = []
 image_file = [os.path.join(base_dir, "images", f"img{i}.jpg") for i in range(1, 5)]
@@ -66,6 +102,7 @@ def reset_game():
 
 
 def home_page():
+    play_background_music()
     while True:
         screen.fill(WHITE)  # Đặt nền trắng cho trang chủ
 
@@ -84,12 +121,15 @@ def home_page():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_start.collidepoint(event.pos):
+                    play_click_sound()
                     print("Đã nhấn vào bắt đầu")
                     reset_game()  # Reset màn chơi trước khi bắt đầu
                     game_state = "play"
                     return
                 if button_setting.collidepoint(event.pos):
+                    play_click_sound()
                     print("Đã nhấn cài đặt")
                     
                 if button_account.collidepoint(event.pos):
+                    play_click_sound()
                     print("Đã nhấn tài khoản")
