@@ -1,16 +1,41 @@
 import pygame
 import random
-from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page, reset_game, font
+import os
+from settings import screen, resized_background, SCREEN_WIDTH, SCREEN_HEIGHT, home_page, reset_game, font, image_list, play_click_sound, play_match_sound, play_complete_sound, play_gameover_sound
 from player import squares, update_grid_position
-from settings import image_list, play_click_sound, play_match_sound, play_complete_sound, play_gameover_sound
 
 # Khởi tạo Pygame
 pygame.init()
 
+# 
+ASSET_DIR = os.path.join("..", "assets")
+IMAGE_DIR = os.path.join(ASSET_DIR, "images")
+UNDO_IMAGE_PATH = os.path.join(IMAGE_DIR, "undo.jpg")
+RESET_IMAGE_PATH = os.path.join(IMAGE_DIR, "Reset.jpg")
+
+try:
+    undo_image = pygame.image.load(UNDO_IMAGE_PATH).convert_alpha()
+    reset_image = pygame.image.load(RESET_IMAGE_PATH).convert_alpha()
+except pygame.error as e:
+    print(f"Không thể tải hình ảnh: {e}")
+    undo_image = None
+    reset_image = None
+
+# Cấu hình nút tròn
+BUTTON_RADIUS = 20 
+BUTTON_SPACING = 20
+CENTER_X = SCREEN_WIDTH // 2
+BUTTON_Y = SCREEN_HEIGHT - 120  
+
+# Cấu hình chữ số lượt
+COUNTER_TEXT_COLOR = (255, 255, 255)
+COUNTER_FONT_SIZE = 20
+counter_font = pygame.font.Font(None, COUNTER_FONT_SIZE)
+
 class Square:
     def __init__(self, image, rect):
         self.image = image
-        self.rect = pygame.Rect(rect)  # Đảm bảo rect là đối tượng pygame.Rect
+        self.rect = pygame.Rect(rect)
 
     def draw(self):
         screen.blit(self.image, self.rect.topleft)
@@ -19,14 +44,18 @@ class SquareManager:
     def __init__(self):
         self.selected_squares = []
         self.max_selected = 7
+        self.history = []
+        self.undo_limit = 3
+        self.undo_count = 0
 
     def add_square(self, square):
         if square not in self.selected_squares and len(self.selected_squares) < self.max_selected:
+            self.history.append(("add", square))
             self.selected_squares.append(square)
             self.update_selected_position()
             if len(self.selected_squares) == self.max_selected and not self.check_match():
                 print("Khung đầy và không có match, thua game!")
-                return False  # Trả về False để báo hiệu thua game
+                return False
             self.check_match()
             return True
         return True
@@ -46,8 +75,11 @@ class SquareManager:
 
         if matched_images:
             play_match_sound()
+            removed_squares = [sq for sq in self.selected_squares if sq.image in matched_images]
+            self.history.append(("remove", list(removed_squares)))
             self.selected_squares = [sq for sq in self.selected_squares if sq.image not in matched_images]
             self.update_selected_position()
+            self.undo_count = max(0, self.undo_count - len(removed_squares))
             return True
         return False
 
@@ -55,21 +87,50 @@ class SquareManager:
         for square in self.selected_squares:
             square.draw()
 
-def draw_button(button, text):
-    pygame.draw.rect(screen, (200, 200, 200), button, border_radius=10)
-    text_surface = font.render(text, True, (0, 0, 0))
-    text_rect = text_surface.get_rect(center=button.center)
-    screen.blit(text_surface, text_rect)
+    def undo(self):
+        if self.history and self.undo_count < self.undo_limit:
+            last_action, data = self.history.pop()
+            if last_action == "add":
+                if self.selected_squares and self.selected_squares[-1] == data:
+                    self.selected_squares.pop()
+                    self.update_selected_position()
+                    self.undo_count += 1
+            elif last_action == "remove":
+                self.selected_squares.extend(data)
+                self.update_selected_position()
+                self.undo_count += len(data)
+
+def draw_circular_button(screen, image, center_x, center_y, radius, active=True, counter_text=None):
+    if image:
+        scaled_image = pygame.transform.scale(image, (radius * 2, radius * 2))
+        rect = scaled_image.get_rect(center=(center_x, center_y))
+        mask = pygame.mask.from_surface(scaled_image)
+        surface_to_blit = pygame.Surface(rect.size, pygame.SRCALPHA)
+        for x in range(rect.width):
+            for y in range(rect.height):
+                if mask.get_at((x, y)):
+                    surface_to_blit.set_at((x, y), scaled_image.get_at((x, y)))
+        screen.blit(surface_to_blit, rect)
+
+    if active and counter_text is not None:
+        text_surface = counter_font.render(counter_text, True, COUNTER_TEXT_COLOR)
+        text_rect = text_surface.get_rect(center=(center_x, center_y + radius + 15))
+        screen.blit(text_surface, text_rect)
+    elif not active and counter_text is not None:
+        text_surface = counter_font.render(counter_text, True, (128, 128, 128))
+        text_rect = text_surface.get_rect(center=(center_x, center_y + radius + 15))
+        screen.blit(text_surface, text_rect)
 
 def lose():
     global game_state
-    game_state = "lose"  # Chuyển sang trạng thái thua
+    game_state = "lose"
     play_gameover_sound()
 
 def draw_ui():
     pygame.draw.rect(screen, (255, 255, 255), (105, 530, 290, 50), 2)
 
 square_manager = SquareManager()
+reset_available = True
 
 def generate_random_squares(num_squares):
     global squares
@@ -90,7 +151,7 @@ def generate_random_squares(num_squares):
         col, row, layer = position
         x = (SCREEN_WIDTH - (5 * 30 + 4 * 5)) // 2 + col * (30 + 5)
         y = (SCREEN_HEIGHT - (6 * 30 + 5 * 5)) // 3 + row * (30 + 5)
-        squares.append({"rect": pygame.Rect(x, y, 30, 30), "image": img})
+        squares.append({"rect": pygame.Rect(x, y, 100, 100), "image": img})
         available_positions.discard(position)
         if layer == 0:
             available_positions.discard((col, row, 1))
@@ -124,8 +185,19 @@ def move_square_to_selected(square_data, target_rect, animation_duration=500):
         pygame.display.flip()
         pygame.time.Clock().tick(120)
 
+def reset_board():
+    global squares, reset_available
+    if reset_available:
+        play_click_sound()
+        squares = []
+        generate_random_squares(30)
+        square_manager.selected_squares = []
+        square_manager.history = []
+        square_manager.undo_count = 0
+        reset_available = False
+
 def run_game():
-    global game_state, squares
+    global game_state, squares, reset_available
     running = True
     dragging = None
     offset_x, offset_y = 0, 0
@@ -134,8 +206,15 @@ def run_game():
     selected_a_square = None
     dragging_original_index = None
 
-    # Nút "Chơi lại" cho màn hình Game Over
-    button_retry = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 20, 200, 50)
+    # Vị trí nút Undo (bên trái)
+    undo_button_center_x = CENTER_X - BUTTON_RADIUS - BUTTON_SPACING // 2
+    # Vị trí nút Reset (bên phải)
+    reset_button_center_x = CENTER_X + BUTTON_RADIUS + BUTTON_SPACING // 2
+    undo_button_center_y = BUTTON_Y
+    reset_button_center_y = BUTTON_Y
+
+    undo_button_rect = pygame.Rect(undo_button_center_x - BUTTON_RADIUS, undo_button_center_y - BUTTON_RADIUS, BUTTON_RADIUS * 2, BUTTON_RADIUS * 2)
+    reset_button_rect = pygame.Rect(reset_button_center_x - BUTTON_RADIUS, reset_button_center_y - BUTTON_RADIUS, BUTTON_RADIUS * 2, BUTTON_RADIUS * 2)
 
     while running:
         screen.blit(resized_background, (0, 0))
@@ -148,6 +227,8 @@ def run_game():
                 reset_game()
                 home_page()
                 generate_random_squares(30)
+                square_manager.undo_count = 0
+                reset_available = True
                 game_state = "play"
 
             elif game_state == "play":
@@ -162,6 +243,13 @@ def run_game():
                             offset_y = mouse_pos[1] - square["rect"].y
                             selected_a_square = squares[dragging_original_index].copy()
                             break
+                    # Kiểm tra nút Reset
+                    if reset_image and reset_button_rect.collidepoint(mouse_pos) and reset_available:
+                        reset_board()
+                    # Kiểm tra nút Undo
+                    if undo_image and undo_button_rect.collidepoint(mouse_pos) and square_manager.undo_count < square_manager.undo_limit:
+                        play_click_sound()
+                        square_manager.undo()
 
                 if event.type == pygame.MOUSEMOTION and dragging:
                     mouse_moved = True
@@ -178,7 +266,7 @@ def run_game():
                             move_square_to_selected(selected_a_square, target_rect)
                             del squares[dragging_original_index]
                             if not square_manager.add_square(Square(selected_a_square["image"], target_rect)):
-                                lose()  # Chuyển sang trạng thái thua
+                                lose()
                     dragging = None
                     selected_a_square = None
                     dragging_original_index = None
@@ -193,7 +281,10 @@ def run_game():
                     if button_retry.collidepoint(event.pos):
                         play_click_sound()
                         reset_game()
-                        square_manager.selected_squares = []  # Xóa danh sách ô đã chọn
+                        square_manager.selected_squares = []
+                        square_manager.history = []
+                        square_manager.undo_count = 0
+                        reset_available = True
                         generate_random_squares(30)
                         game_state = "play"
 
@@ -203,6 +294,10 @@ def run_game():
                 screen.blit(square["image"], square["rect"].topleft)
             draw_ui()
             square_manager.draw_selected_squares()
+            if undo_image:
+                draw_circular_button(screen, undo_image, undo_button_center_x, undo_button_center_y, BUTTON_RADIUS, square_manager.undo_count < square_manager.undo_limit, str(square_manager.undo_limit - square_manager.undo_count))
+            if reset_image:
+                draw_circular_button(screen, reset_image, reset_button_center_x, reset_button_center_y, BUTTON_RADIUS, reset_available)
 
             if not squares:
                 overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -223,8 +318,13 @@ def run_game():
             pygame.draw.rect(screen, (0, 0, 0), box_rect, 3, border_radius=10)
             text = font.render("Game Over", True, (0, 0, 0))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
+            # Lưu ý: Nút "Retry" vẫn là hình chữ nhật với chữ nhỏ
+            button_retry = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 20, 200, 50)
             draw_button(button_retry, "Retry")
 
         pygame.display.flip()
 
     pygame.quit()
+
+if __name__ == '__main__':
+    run_game()
