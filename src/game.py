@@ -7,7 +7,7 @@ from player import squares, update_grid_position
 # Khởi tạo Pygame
 pygame.init()
 
-#
+# 
 UNDO_IMAGE_PATH = os.path.join(base_dir, "images", "undo.jpg")
 RESET_IMAGE_PATH = os.path.join(base_dir, "images", "Reset.jpg")
 
@@ -20,10 +20,10 @@ except pygame.error as e:
     reset_image = None
 
 # Cấu hình nút tròn
-BUTTON_RADIUS = 20
+BUTTON_RADIUS = 20 
 BUTTON_SPACING = 20
 CENTER_X = SCREEN_WIDTH // 2
-BUTTON_Y = SCREEN_HEIGHT - 120
+BUTTON_Y = SCREEN_HEIGHT - 120  
 
 # Cấu hình chữ số lượt
 COUNTER_TEXT_COLOR = (255, 255, 255)
@@ -189,7 +189,7 @@ def move_square_to_selected(square_data, target_rect, animation_duration=500):
         pygame.time.Clock().tick(120)
 
 def reset_board():
-    global squares, reset_available, game_state
+    global squares, reset_available
     if reset_available:
         play_click_sound()
         squares = []
@@ -198,7 +198,6 @@ def reset_board():
         square_manager.history = []
         square_manager.undo_count = 0
         reset_available = False
-        game_state = "play"
 
 def run_game():
     global game_state, squares, reset_available
@@ -280,6 +279,11 @@ def run_game():
                     selected_a_square = None
                     dragging_original_index = None
 
+                # Xử lý khi nhấn vào box "Level complete"
+                if not squares and event.type == pygame.MOUSEBUTTONDOWN:
+                    if box_rect.collidepoint(mouse_pos):
+                        game_state = "home"
+
             elif game_state == "lose":
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if button_retry.collidepoint(event.pos):
@@ -295,7 +299,7 @@ def run_game():
         # Vẽ giao diện theo trạng thái
         if game_state == "play":
             for square in squares:
-                # Vẽ hình ảnh với kích thước 30x30
+              
                 scaled_image = pygame.transform.scale(square["image"], (30, 30))
                 screen.blit(scaled_image, square["rect"].topleft)
             draw_ui()
@@ -317,13 +321,13 @@ def run_game():
                 text_rect = text.get_rect(center=(box_rect.centerx, box_rect.top + 40))
                 screen.blit(text, text_rect)
 
-                # Chiều cao dự kiến của nút
+                # Chiều cao  của nút
                 button_height = 40
                 # Khoảng cách từ đáy màn hình
                 button_margin_bottom = 20
                 # Khoảng cách giữa hai nút
                 button_spacing = 20
-                # Chiều rộng mỗi nút (có thể điều chỉnh)
+                # Chiều rộng mỗi nút 
                 button_width = 100
 
                 # Vị trí nút Home (bên trái)
@@ -352,7 +356,6 @@ def run_game():
                     elif reset_level_button_rect.collidepoint(mouse_pos):
                         play_click_sound()
                         reset_board()
-
         elif game_state == "lose":
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))
@@ -361,10 +364,8 @@ def run_game():
             pygame.draw.rect(screen, (255, 255, 255), box_rect, border_radius=10)
             pygame.draw.rect(screen, (0, 0, 0), box_rect, 3, border_radius=10)
             text = font.render("Game Over", True, (0, 0, 0))
-            text_rect = text.get_rect(center=(box_rect.centerx, box_rect.top + 40))
-            screen.blit(text, text_rect)
-            # Lưu ý: Nút "Retry" vẫn là hình chữ nhật với chữ nhỏ
-            button_retry = pygame.Rect(box_rect.centerx - 100, box_rect.centery + 20, 200, 50)
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
+            button_retry = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 20, 200, 50)
             draw_button(button_retry, "Retry")
 
         pygame.display.flip()
