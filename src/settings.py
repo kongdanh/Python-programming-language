@@ -26,7 +26,8 @@ game_state = "home"
 # Định nghĩa các nút
 button_start = pygame.Rect(SCREEN_WIDTH // 2 - 100 , 250, 200, 50)
 button_setting = pygame.Rect(SCREEN_WIDTH // 2 - 100, 320, 200, 50)
-button_account = pygame.Rect(SCREEN_WIDTH // 2 - 100, 390, 200, 50)
+button_highscore = pygame.Rect(SCREEN_WIDTH // 2 - 100, 390, 200, 50)
+button_about = pygame.Rect(SCREEN_WIDTH // 2 - 150, 460, 300, 50)
 
 # Vẽ các nút
 def draw_button(button, text):
@@ -111,7 +112,8 @@ def home_page():
 
         draw_button(button_start, "START")
         draw_button(button_setting, "SETTING")
-        draw_button(button_account, "ACCOUNT")
+        draw_button(button_highscore, "HIGH SCORE")
+        draw_button(button_about, "ABOUT THIS GAME")
         
         pygame.display.flip()
         
@@ -130,6 +132,10 @@ def home_page():
                     play_click_sound()
                     print("Đã nhấn cài đặt")
                     
-                if button_account.collidepoint(event.pos):
+                if button_highscore.collidepoint(event.pos):
                     play_click_sound()
-                    print("Đã nhấn tài khoản")
+                    print("Đã nhấn high score")
+                
+                if button_about.collidepoint(event.pos):
+                    play_click_sound()
+                    print("abtg")
