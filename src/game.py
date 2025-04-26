@@ -299,7 +299,7 @@ def run_game():
         # Vẽ giao diện theo trạng thái
         if game_state == "play":
             for square in squares:
-                # Vẽ hình ảnh với kích thước 30x30
+              
                 scaled_image = pygame.transform.scale(square["image"], (30, 30))
                 screen.blit(scaled_image, square["rect"].topleft)
             draw_ui()
@@ -318,8 +318,44 @@ def run_game():
                 pygame.draw.rect(screen, (0, 0, 0), box_rect, 3, border_radius=10)
                 play_complete_sound()
                 text = font.render("Level complete!", True, (0, 0, 0))
-                screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
+                text_rect = text.get_rect(center=(box_rect.centerx, box_rect.top + 40))
+                screen.blit(text, text_rect)
 
+                # Chiều cao  của nút
+                button_height = 40
+                # Khoảng cách từ đáy màn hình
+                button_margin_bottom = 20
+                # Khoảng cách giữa hai nút
+                button_spacing = 20
+                # Chiều rộng mỗi nút 
+                button_width = 100
+
+                # Vị trí nút Home (bên trái)
+                home_button_rect = pygame.Rect(
+                    SCREEN_WIDTH // 2 - button_width - button_spacing // 2,
+                    SCREEN_HEIGHT - button_height - button_margin_bottom,
+                    button_width,
+                    button_height
+                )
+                draw_button(home_button_rect, "Home")
+
+                # Vị trí nút Reset (bên phải)
+                reset_level_button_rect = pygame.Rect(
+                    SCREEN_WIDTH // 2 + button_spacing // 2,
+                    SCREEN_HEIGHT - button_height - button_margin_bottom,
+                    button_width,
+                    button_height
+                )
+                draw_button(reset_level_button_rect, "Reset")
+
+                mouse_pos = pygame.mouse.get_pos()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if home_button_rect.collidepoint(mouse_pos):
+                        play_click_sound()
+                        game_state = "home"
+                    elif reset_level_button_rect.collidepoint(mouse_pos):
+                        play_click_sound()
+                        reset_board()
         elif game_state == "lose":
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))
@@ -329,7 +365,6 @@ def run_game():
             pygame.draw.rect(screen, (0, 0, 0), box_rect, 3, border_radius=10)
             text = font.render("Game Over", True, (0, 0, 0))
             screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 20))
-            # Lưu ý: Nút "Retry" vẫn là hình chữ nhật với chữ nhỏ
             button_retry = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 20, 200, 50)
             draw_button(button_retry, "Retry")
 
@@ -337,5 +372,3 @@ def run_game():
 
     pygame.quit()
 
-if __name__ == '__main__':
-    run_game()
