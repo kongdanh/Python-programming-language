@@ -14,7 +14,7 @@ def update_grid_position(width, height):
     for row in range(rows):
         for col in range(cols):
             x = start_x + col * (square_size + spacing)
-            y = start_y + row * (square_size + spacing)
+            y = start_y + row * (square_size + spacing) 
             squares.append({"rect": pygame.Rect(x, y, square_size, square_size),
                             "pos": (col, row),
                             "image": random.choice(image_list)})

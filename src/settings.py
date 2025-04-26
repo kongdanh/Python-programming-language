@@ -56,7 +56,7 @@ resized_background = pygame.transform.scale(background, (SCREEN_WIDTH, SCREEN_HE
 
 # Thiết lập lưới
 cols, rows = 6, 5
-square_size = 30
+square_size = 50
 spacing = 5
 
 # Âm thanh
