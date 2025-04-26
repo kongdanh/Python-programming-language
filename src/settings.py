@@ -217,8 +217,7 @@ def home_page():
         
         # Vẽ nút music với trạng thái hiện tại (ON/OFF)
         music_text = "MUSIC: ON" if sound_enabled else "MUSIC: OFF"
-        music_color = GREEN if sound_enabled else RED
-        draw_button(button_music, music_text, music_color)
+        draw_button(button_music, music_text)
         
         pygame.display.flip()
         
