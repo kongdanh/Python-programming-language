@@ -454,15 +454,49 @@ def reset_board():
     global squares, reset_available
     if reset_available:
         play_click_sound()
-        # Lấy số lượng ô hiện tại trên màn đấu
-        current_squares_count = len(squares)
-        # Xóa các ô hiện tại trên màn đấu
-        squares = []
+        # Tạo danh sách ô mới trước
+        new_squares = []
         num_new_squares = max(45 - len(square_manager.selected_squares), 20)
-        # Tạo số ô mới bằng với số ô đã bị loại bỏ (ước tính)
-        num_to_regenerate = num_new_squares - current_squares_count
-        if num_to_regenerate > 0:
-            generate_random_squares(num_to_regenerate)
+        # Tạo các ô mới
+        available_positions = set()
+        grid_width = 5
+        grid_height = 6
+        max_layers = 2
+        for r in range(grid_height):
+            for c in range(grid_width):
+                for layer in range(max_layers):
+                    available_positions.add((c, r, layer))
+
+        image_choices = random.choices(image_list, k=num_new_squares)
+
+        grid_pixel_width = grid_width * square_size + (grid_width - 1) * spacing
+        grid_pixel_height = grid_height * square_size + (grid_height - 1) * spacing
+        offset_x = (SCREEN_WIDTH - grid_pixel_width) // 2
+        offset_y = (SCREEN_HEIGHT - grid_pixel_height) // 2 - 50
+
+        layer_offset = 10
+
+        for img in image_choices:
+            if not available_positions:
+                break
+            position = random.choice(list(available_positions))
+            col, row, layer = position
+            x = offset_x + col * (square_size + spacing)
+            y = offset_y + row * (square_size + spacing)
+            if layer == 1:
+                x += layer_offset
+                y += layer_offset
+            new_squares.append({
+                "rect": pygame.Rect(x, y, square_size, square_size),
+                "image": img,
+                "layer": layer,
+                "col": col,
+                "row": row
+            })
+            available_positions.discard(position)
+
+        # Gán lại squares sau khi đã tạo danh sách mới
+        squares = new_squares
         reset_available = False
 
 def run_game():
