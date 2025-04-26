@@ -101,7 +101,6 @@ class SquareManager:
             self.selected_squares = [sq for sq in self.selected_squares if sq.image not in matched_images]
             self.update_selected_position()
             self.score += 10
-            self.undo_count = max(0, self.undo_count - len(removed_squares))
             return True
         return False
 
@@ -129,11 +128,25 @@ class SquareManager:
                                 "row": data.row
                             })
                         self.undo_count += 1
-            elif last_action == "remove":
-                restored_squares = [Square(sq.image, sq.rect.copy(), sq.layer, sq.col, sq.row) for sq in data]
-                self.selected_squares.extend(restored_squares)
+            elif last_action == "remove":            
+                restored_squares_data = [sq for sq in data]
+                num_restored = len(restored_squares_data)
+                for sq_data in restored_squares_data:
+                    restored_square = Square(sq_data.image, sq_data.rect.copy(), sq_data.layer, sq_data.col, sq_data.row)
+                    # Thêm lại ô vào danh sách các ô trên màn đấu
+                    squares.append({
+                        "rect": restored_square.rect,
+                        "image": restored_square.image,
+                        "layer": restored_square.layer,
+                        "col": restored_square.col,
+                        "row": restored_square.row
+                    })
+                    # Loại bỏ ô tương ứng (nếu có) khỏi selected_squares
+                    self.selected_squares = [s for s in self.selected_squares if not (
+                        s.image == restored_square.image and s.original_rect == restored_square.original_rect
+                    )]
                 self.update_selected_position()
-                self.undo_count += len(restored_squares)
+                
 
 def draw_circular_button(screen, image, center_x, center_y, radius, active=True, counter_text=None):
     if image:
@@ -441,9 +454,15 @@ def reset_board():
     global squares, reset_available
     if reset_available:
         play_click_sound()
+        # Lấy số lượng ô hiện tại trên màn đấu
+        current_squares_count = len(squares)
+        # Xóa các ô hiện tại trên màn đấu
         squares = []
-        num_squares = max(45 - len(square_manager.selected_squares), 20)
-        generate_random_squares(num_squares)
+        num_new_squares = max(45 - len(square_manager.selected_squares), 20)
+        # Tạo số ô mới bằng với số ô đã bị loại bỏ (ước tính)
+        num_to_regenerate = num_new_squares - current_squares_count
+        if num_to_regenerate > 0:
+            generate_random_squares(num_to_regenerate)
         reset_available = False
 
 def run_game():
