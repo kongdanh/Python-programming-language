@@ -97,7 +97,7 @@ def stop_background_music():
 
 # Hình ảnh cho khối
 image_list = []
-image_file = [os.path.join(base_dir, "images", f"img{i}.jpg") for i in range(1, 5)]
+image_file = [os.path.join(base_dir, "images", f"img{i+1}.png") for i in range(1, 5)]
 for img_f in image_file:
     img = pygame.image.load(img_f)
     img = pygame.transform.scale(img, (square_size, square_size))
